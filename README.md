@@ -3,10 +3,12 @@
 ## Opis
 Krótki opis mojego projektu.
 
-## Technologie
-- HTML
-- CSS
-- JavaScript
+## Backlog
+- [ ] Jako użytkownik chcę żeby
+- [ ] Jako chcę żeby
+- [ ] Jako chcę żeby
+- [ ] Jako chcę żeby
+- [ ] Jako chcę żeby
 
 ## Uruchomienie
 1. Pobierz repozytorium.
