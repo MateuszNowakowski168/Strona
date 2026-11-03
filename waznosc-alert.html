@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ważności</title>
+<style>
+:root{color-scheme:dark;--bg:#090909;--panel:#151515;--red:#f02b36;--muted:#888}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f5f5f5;font:14px system-ui,sans-serif;min-height:100vh;display:grid;place-items:center;padding:18px}
+main{width:min(100%,360px)}h1{font-size:20px;letter-spacing:-.6px;margin:0 0 4px}h1 span{color:var(--red)}.sub{color:var(--muted);font-size:11px;margin:0 0 18px}
+form,.item{background:var(--panel);border:1px solid #292929;border-radius:10px;padding:12px}
+form{display:grid;gap:8px;margin-bottom:12px}input,button{font:inherit;border-radius:7px;padding:9px;border:1px solid #333;background:#0c0c0c;color:#fff;min-width:0}input:focus{outline:1px solid var(--red)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}button{background:var(--red);border-color:var(--red);font-weight:700;cursor:pointer}button:hover{filter:brightness(1.12)}.section{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin:14px 2px 7px}.list{display:grid;gap:7px}.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px}.name{font-weight:650;overflow-wrap:anywhere}.date{font-size:11px;color:var(--muted);margin-top:3px}.status{font-size:10px;color:var(--red);font-weight:700;text-align:right}.remove{border:0;background:transparent;color:#777;padding:4px 6px;font-size:16px}.empty{color:#666;text-align:center;padding:18px;font-size:12px}.expired{border-color:#6f2025}.soon{border-color:#7a4a20}.soon .status{color:#ffb14a}.safe .status{color:#68c98a}
+</style>
+</head>
+<body>
+<main>
+  <h1><span>WAŻNOŚĆ</span> / ALERT</h1>
+  <p class="sub">Mały organizer terminów ważności.</p>
+  <form id="form">
+    <input id="name" placeholder="Nazwa produktu lub dokumentu" maxlength="70" required>
+    <div class="fields">
+      <input id="date" type="date" required aria-label="Data ważności">
+      <button type="submit">+ Dodaj</button>
+    </div>
+  </form>
+  <div class="section"><span>TWOJE TERMINY</span><span id="count">0 pozycji</span></div>
+  <section class="list" id="list"><div class="empty">Brak zapisanych terminów.</div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s), form=$('#form'), list=$('#list');
+let items=JSON.parse(localStorage.getItem('waznosci-v1')||'[]');
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+function render(){
+  items.sort((a,b)=>a.date.localeCompare(b.date));
+  localStorage.setItem('waznosci-v1',JSON.stringify(items));
+  $('#count').textContent=items.length+' '+(items.length===1?'pozycja':'pozycji');
+  list.innerHTML='';
+  if(!items.length){list.innerHTML='<div class="empty">Brak zapisanych terminów.</div>';return}
+  for(const item of items){
+    const days=Math.ceil((new Date(item.date+'T00:00:00')-today())/86400000);
+    const state=days<0?['PO TERMINIE','expired']:days<=7?['WKRÓTCE · '+(days===0?'DZIŚ':days+' dni'),'soon']:['OK · '+days+' dni','safe'];
+    const el=document.createElement('article');el.className='item '+state[1];
+    const info=document.createElement('div');info.style.minWidth='0';
+    const name=document.createElement('div');name.className='name';name.textContent=item.name;
+    const date=document.createElement('div');date.className='date';date.textContent=new Date(item.date+'T00:00:00').toLocaleDateString('pl-PL');
+    info.append(name,date);
+    const right=document.createElement('div');right.style.display='flex';right.style.alignItems='center';right.style.gap='6px';
+    const status=document.createElement('div');status.className='status';status.textContent=state[0];
+    const del=document.createElement('button');del.type='button';del.className='remove';del.setAttribute('aria-label','Usuń');del.textContent='×';del.onclick=()=>{items=items.filter(x=>x.id!==item.id);render()};
+    right.append(status,del);el.append(info,right);list.append(el);
+  }
+}
+form.addEventListener('submit',e=>{e.preventDefault();items.push({id:crypto.randomUUID(),name:$('#name').value.trim(),date:$('#date').value});form.reset();render()});
+render();
+</script>
+</body>
+</html>
