@@ -15,4 +15,4 @@ Krótki opis mojego projektu.
 2. Otwórz plik `index.html` w przeglądarce.
 
 ## Autor
-Moje imię
+Mateusz Nowakowski
